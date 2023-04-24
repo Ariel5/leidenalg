@@ -89,6 +89,8 @@ class MutableVertexPartition
 
     void from_partition(MutableVertexPartition* partition);
 
+    // Ariel notes - if nr. communities decreases, update : else 0 - why else 0?
+    // Ariel TODO whats the diff. betwn InCom, FromComm, ToComm?
     inline double total_weight_in_comm(size_t comm)   { return comm < _n_communities ? this->_total_weight_in_comm[comm] : 0.0; };
     inline double total_weight_from_comm(size_t comm) { return comm < _n_communities ? this->_total_weight_from_comm[comm] : 0.0; };
     inline double total_weight_to_comm(size_t comm)   { return comm < _n_communities ? this->_total_weight_to_comm[comm] : 0.0; };
@@ -96,6 +98,7 @@ class MutableVertexPartition
     inline double total_weight_in_all_comms()         { return this->_total_weight_in_all_comms; };
     inline size_t total_possible_edges_in_all_comms() { return this->_total_possible_edges_in_all_comms; };
 
+    // out-degree of node v to community comm
     inline double weight_to_comm(size_t v, size_t comm)
     {
       if (this->_current_node_cache_community_to != v)
@@ -128,6 +131,7 @@ class MutableVertexPartition
     }
 
     vector<size_t> const& get_neigh_comms(size_t v, igraph_neimode_t);
+    // Ariel - don't know what this is
     vector<size_t> get_neigh_comms(size_t v, igraph_neimode_t mode, vector<size_t> const& constrained_membership);
 
     // By delegating the responsibility for deleting the graph to the partition,

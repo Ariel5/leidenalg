@@ -72,6 +72,7 @@ void MutableVertexPartition::clean_mem()
 
 }
 
+// Community size. Apparently different from Nr. nodes in community
 double MutableVertexPartition::csize(size_t comm)
 {
   if (comm < this->_csize.size())
@@ -80,6 +81,7 @@ double MutableVertexPartition::csize(size_t comm)
     return 0;
 }
 
+// This is nr. nodes in community
 size_t MutableVertexPartition::cnodes(size_t comm)
 {
   if (comm < this->_cnodes.size())
@@ -88,19 +90,22 @@ size_t MutableVertexPartition::cnodes(size_t comm)
     return 0;
 }
 
+// Get nodes in community with ID 'comm'
+// TODO Ariel maybe it's better to keep track of this instead of searching?
 vector<size_t> MutableVertexPartition::get_community(size_t comm)
 {
   vector<size_t> community;
-  community.reserve(this->_cnodes[comm]);
-  for (size_t i = 0; i < this->graph->vcount(); i++)
+  community.reserve(this->_cnodes[comm]); // Create vector size nr. nodes of community with ID 'comm'
+  for (size_t i = 0; i < this->graph->vcount(); i++) // O(V)
     if (this->_membership[i] == comm)
-      community.push_back(i);
+      community.push_back(i); // Scan memberships of all nodes, add to return vector
   return community;
 }
 
+// Return all nodes with their respective communities (ragged array - vector<vector>)
 vector< vector<size_t> > MutableVertexPartition::get_communities()
 {
-  vector< vector<size_t> > communities(this->_n_communities);
+  vector< vector<size_t> > communities(this->_n_communities); // ragged array of communities
 
   for (size_t c = 0; c < this->_n_communities; c++)
   {

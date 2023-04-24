@@ -97,11 +97,13 @@ double ModularityVertexPartition::diff_move(size_t v, size_t new_comm)
     #ifdef DEBUG
       cerr << "\t" << "diff_old: " << diff_old << endl;
     #endif
+    // Ariel Important line
     double diff_new = (w_to_new + self_weight - k_out*K_in_new/total_weight) + \
                (w_from_new + self_weight - k_in*K_out_new/total_weight);
     #ifdef DEBUG
       cerr << "\t" << "diff_new: " << diff_new << endl;
     #endif
+    // Ariel Important line 
     diff = diff_new - diff_old;
     #ifdef DEBUG
       cerr << "\t" << "diff: " << diff << endl;
@@ -137,23 +139,29 @@ double ModularityVertexPartition::quality()
   if (this->graph->is_directed())
     m = this->graph->total_weight();
   else
-    m = 2*this->graph->total_weight();
+    m = 2*this->graph->total_weight(); // If Undirected, count each edge weight twice (both ways)
 
   if (m == 0)
     return 0.0;
 
+  // Ariel - Modularity computed here for all communities
   for (size_t c = 0; c < this->n_communities(); c++)
   {
-    double w = this->total_weight_in_comm(c);
-    double w_out = this->total_weight_from_comm(c);
-    double w_in = this->total_weight_to_comm(c);
+    // Ariel Seems like a push-pull + self-update
+    double w = this->total_weight_in_comm(c); // TODO What do these 3 lines mean
+    double w_out = this->total_weight_from_comm(c); // push-modularity?
+    double w_in = this->total_weight_to_comm(c); // pull-modularity?
     #ifdef DEBUG
       double csize = this->csize(c);
       cerr << "\t" << "Comm: " << c << ", size=" << csize << ", w=" << w << ", w_out=" << w_out << ", w_in=" << w_in << "." << endl;
     #endif
+
+    // Ariel - This is the crucial line
+    // TODO Is graph.total_weight global? Seems so. Can we make calc. local?
+      // TODO Why divide InWeight by 4 when Undirected?
     mod += w - w_out*w_in/((this->graph->is_directed() ? 1.0 : 4.0)*this->graph->total_weight());
   }
-  double q = (2.0 - this->graph->is_directed())*mod;
+  double q = (2.0 - this->graph->is_directed())*mod; // <=> if directed: return mod ; else return 2*mod
   #ifdef DEBUG
     cerr << "exit double ModularityVertexPartition::quality()" << endl;
     cerr << "return " << q/m << endl << endl;
