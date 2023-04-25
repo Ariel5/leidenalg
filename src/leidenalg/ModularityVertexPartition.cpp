@@ -31,83 +31,47 @@ ModularityVertexPartition* ModularityVertexPartition::create(Graph* graph, vecto
 
 /*****************************************************************************
   Returns the difference in modularity if we move a node to a new community
+  TODO Ariel: do we try this for all neighbors? Where is this called?
 *****************************************************************************/
 double ModularityVertexPartition::diff_move(size_t v, size_t new_comm)
 {
   #ifdef DEBUG
     cerr << "double ModularityVertexPartition::diff_move(" << v << ", " << new_comm << ")" << endl;
   #endif
-  size_t old_comm = this->_membership[v];
+  size_t old_comm = this->_membership[v]; // Current community vertex v belongs to
   double diff = 0.0;
+
+  // So if is_directed, multiply x1. If undirected, multiply all edges x2 - makes sense
   double total_weight = this->graph->total_weight()*(2.0 - this->graph->is_directed());
   if (total_weight == 0.0)
     return 0.0;
   if (new_comm != old_comm)
   {
-    #ifdef DEBUG
-      cerr << "\t" << "old_comm: " << old_comm << endl;
-    #endif
+    // How "heavy" the connection is to each of the 2 communities
+    // TODO Ariel is this computed everytime? Hopefully it's stored - source stays same in loop
     double w_to_old = this->weight_to_comm(v, old_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "w_to_old: " << w_to_old << endl;
-    #endif
     double w_from_old = this->weight_from_comm(v, old_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "w_from_old: " << w_from_old << endl;
-    #endif
     double w_to_new = this->weight_to_comm(v, new_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "w_to_new: " << w_to_new << endl;
-    #endif
     double w_from_new = this->weight_from_comm(v, new_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "w_from_new: " << w_from_new << endl;
-    #endif
+
+    // ?
     double k_out = this->graph->strength(v, IGRAPH_OUT);
-    #ifdef DEBUG
-      cerr << "\t" << "k_out: " << k_out << endl;
-    #endif
     double k_in = this->graph->strength(v, IGRAPH_IN);
-    #ifdef DEBUG
-      cerr << "\t" << "k_in: " << k_in << endl;
-    #endif
+
+    // ?
     double self_weight = this->graph->node_self_weight(v);
-    #ifdef DEBUG
-      cerr << "\t" << "self_weight: " << self_weight << endl;
-    #endif
     double K_out_old = this->total_weight_from_comm(old_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "K_out_old: " << K_out_old << endl;
-    #endif
     double K_in_old = this->total_weight_to_comm(old_comm);
-    #ifdef DEBUG
-      cerr << "\t" << "K_in_old: " << K_in_old << endl;
-    #endif
     double K_out_new = this->total_weight_from_comm(new_comm) + k_out;
-    #ifdef DEBUG
-      cerr << "\t" << "K_out_new: " << K_out_new << endl;
-    #endif
     double K_in_new = this->total_weight_to_comm(new_comm) + k_in;
-    #ifdef DEBUG
-      cerr << "\t" << "K_in_new: " << K_in_new << endl;
-      cerr << "\t" << "total_weight: " << total_weight << endl;
-    #endif
+
+    // ?
     double diff_old = (w_to_old - k_out*K_in_old/total_weight) + \
                (w_from_old - k_in*K_out_old/total_weight);
-    #ifdef DEBUG
-      cerr << "\t" << "diff_old: " << diff_old << endl;
-    #endif
-    // Ariel Important line
     double diff_new = (w_to_new + self_weight - k_out*K_in_new/total_weight) + \
                (w_from_new + self_weight - k_in*K_out_new/total_weight);
-    #ifdef DEBUG
-      cerr << "\t" << "diff_new: " << diff_new << endl;
-    #endif
-    // Ariel Important line 
+
     diff = diff_new - diff_old;
-    #ifdef DEBUG
-      cerr << "\t" << "diff: " << diff << endl;
-    #endif
   }
   #ifdef DEBUG
     cerr << "exit double ModularityVertexPartition::diff_move((" << v << ", " << new_comm << ")" << endl;
