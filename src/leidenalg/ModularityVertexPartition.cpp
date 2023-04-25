@@ -54,18 +54,26 @@ double ModularityVertexPartition::diff_move(size_t v, size_t new_comm)
     double w_to_new = this->weight_to_comm(v, new_comm);
     double w_from_new = this->weight_from_comm(v, new_comm);
 
-    // ?
+    // Sum of weights of outgoing edges TODO for this node or community?
     double k_out = this->graph->strength(v, IGRAPH_OUT);
+    // -''- incoming edges for this node
     double k_in = this->graph->strength(v, IGRAPH_IN);
 
-    // ?
+    // ? I think this is for after communities are aggregated
+    // Shows the sum of weights of aggregated inner edges
     double self_weight = this->graph->node_self_weight(v);
+
+    // What's the total edge weught going out of this comm.? Probably to tell how much an impact
+    //  our current node has vs. total
     double K_out_old = this->total_weight_from_comm(old_comm);
     double K_in_old = this->total_weight_to_comm(old_comm);
+
+    // Also how much will it be affected by us adding this node
     double K_out_new = this->total_weight_from_comm(new_comm) + k_out;
     double K_in_new = this->total_weight_to_comm(new_comm) + k_in;
 
-    // ?
+    // Modularity delta? TODO Ariel
+    // Where is this formula?
     double diff_old = (w_to_old - k_out*K_in_old/total_weight) + \
                (w_from_old - k_in*K_out_old/total_weight);
     double diff_new = (w_to_new + self_weight - k_out*K_in_new/total_weight) + \
@@ -77,11 +85,13 @@ double ModularityVertexPartition::diff_move(size_t v, size_t new_comm)
     cerr << "exit double ModularityVertexPartition::diff_move((" << v << ", " << new_comm << ")" << endl;
     cerr << "return " << diff << endl << endl;
   #endif
-  double m;
+
+  double m; // Is this Volume? Why not use total_weight that they defined above? Seems identical
   if (this->graph->is_directed())
     m = this->graph->total_weight();
   else
     m = 2*this->graph->total_weight();
+
   return diff/m;
 }
 
